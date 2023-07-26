@@ -1,0 +1,395 @@
+﻿@page "/"
+@layout NoLayout
+@inject CreditCardContext DbContext
+
+<Loader IsSavingCardDetails="IsSavingCardDetails" />
+<div class="container flex flex-col w-full items-center">
+    <div style="background-image: url('images/background.jpg'); background-size: contain; background-repeat: no-repeat; background-size: cover" class="@(IsCardTurned ? "turn-credit-card" : "") credit-card h-[250px] w-[350px] rounded-[15px] mt-[20px] -mb-[100px] z-10 text-white relative hover:cursor-pointer transform duration-[1500ms]">
+        <div class="front-card h-full w-full absolute p-[20px] relative">
+            <div class="flex justify-between items-center ">
+                <img src="/images/sticker.png" class="h-[50px]" />
+                <div>
+                    <img src="/images/@(CardType).png" class="h-[35px] w-[90px]" />
+                </div>
+            </div>
+            <div>
+                <div class="animate-box @InputFocusedStyle"></div>
+                <div class=" mt-[30px] text-[25px] px-[15px] py-[5px]">
+                    @if (CardType is not null)
+                    {
+                        string CardNumberWithoutSpace = CardNumber.Replace(" ", "");
+
+                        <div class="flex other-cards">
+                            @for (int i = 0; i < OtherCardMask.Length; i++)
+                            {
+                                int index = i;
+                                if (CardNumberWithoutSpace.Length > index)
+                                {
+                                    if (index == CardNumberWithoutSpace.Length - 1)
+                                    {
+                                        <div class="item@(i) slide-character-topdown">@CardNumberWithoutSpace[index]</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="item@(i) ">@CardNumberWithoutSpace[index]</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="item@(i) ">#</span>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="mt-[30px] flex justify-between">
+                    <div class="w-[70%]  overflow-hidden ml-[11px]">
+                        <label class="text-[14px] text-[#95a5a6] font-bold">Card Holder</label>
+                        <div class="uppercase flex">
+                            @if (!string.IsNullOrEmpty(CardHolderName))
+                            {
+                                @foreach (var c in CardHolderName)
+                                {
+                                    if (c.ToString().Trim() == "")
+                                    {
+                                        <p class="w-[5px]"></p>
+                                    }
+                                    else
+                                    {
+                                        <p class="slide-character-fadeUp">@c</p>
+
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <span>AD SOYAD</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="w-[80px] flex justify-end">
+                        <div class="">
+                            <label class="text-[14px] text-[#95a5a6] block font-bold">Expires</label>
+                            <div class="flex">
+                                <div>
+                                    @if (CardMonth > 0)
+                                    {
+                                        <p class="slide-month-character-topdown" @key="CardMonth">@CardMonth.ToString("D2")</p>
+                                    }
+                                    else
+                                    {
+                                        <p>MM</p>
+                                    }
+                                </div>
+                                <div class="mx-[3px]">/</div>
+                                @if (CardYear > 0)
+                                {
+                                    <div class="slide-month-character-topdown" @key="CardYear">@CardYear.ToString().Substring(2, 2)</div>
+                                }
+                                else
+                                {
+                                    <div>YY</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="back-card h-full w-full absolute top-0">
+            <div class="h-[50px] w-full bg-black mt-[40px]"></div>
+            <div class="flex flex-col items-end mt-[10px] mx-[15px]">
+                <label class="text-[14px] block">CVV</label>
+                <div class="bg-white text-right h-[40px] w-full border-1 border-[#eeeee]  text-[20px] px-[15px] py-[5px] rounded-[5px] text-black">@CardCvv</div>
+                <img src="/images/@(CardType).png" class="h-[35px] w-[90px] mt-[20px]" />
+            </div>
+        </div>
+    </div>
+
+    <div class="w-[500px] h-auto pt-[120px] px-[20px] bg-white rounded-[10px] shadow-lg">
+        <div>
+            <div class="mb-[15px]">
+                <label class="text-[13px]">Card Number</label> <br />
+                <input maxlength="19" @onfocus='(e => focusInput("number"))' @onblur='(e => onblurInput("number"))' @bind="CardNumber" @bind:event="oninput" class="form-input p-[8px] w-full" />
+                <InputErrorMessages Errors="CardNumberErrorMessage" />
+
+            </div>
+
+            <div class="mb-[15px]">
+                <label class="text-[13px]">Card Name</label> <br />
+                <input @onfocus='(e => focusInput("name"))' @onblur='(e => onblurInput("name"))'  @bind="CardHolderName" @bind:event="oninput" class="form-input p-[8px] w-full" />
+                <InputErrorMessages Errors="CardHolderErrorMessage" />
+            </div>
+
+            <div class="flex justify-between">
+                <div class="w-[70%]">
+                    <label class="capitalize block text-[13px]">Expiration Date</label>
+                    <div class="flex">
+                        <select class="form-input  px-[10px] py-[8px] outline-none  w-[150px]  mr-[10px]" @bind="CardMonth" @onfocus='(e => focusInput("date"))' @onblur='(e => onblurInput("date"))'>
+                            <option selected disabled class="bg-[#eeee]" value="0">Month</option>
+                            @foreach (int i in Enumerable.Range(1, 12))
+                            {
+                                <option value="@i" @key="i" class="mx-[23px]">
+                                    @(i < 10 ? "0" : "")@i
+                                </option>
+                            }
+                        </select>
+                        <select class="form-input px-[10px] py-[8px] outline-none  w-[150px]" @bind="CardYear" @onfocus='(e => focusInput("date"))' @onblur='(e => onblurInput("date"))'>
+                            <option selected disabled class="bg-[#eeee]" value="0">Year</option>
+                            @foreach (int i in Enumerable.Range(0, 11))
+                            {
+                                <option value="@(i + _currentYear)" @key="i" class="mx-[23px]">
+                                    @(i + _currentYear)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class=" w-[100px] justify-self-end">
+                    <label class="block text-[13px]">CVV</label>
+                    <input @bind="CardCvv" @bind:event="oninput" maxlength="4" @onfocus="(e => ShowBackOfCard(true))" @onblur="(e => ShowBackOfCard(false))" class=" border-[1px] border-[#d1d8e0] p-[5px] rounded-[5px] focus:outline-[#60a5fa] w-full" />
+                </div>
+            </div>
+            <InputErrorMessages Errors="CardMonthErrorMessage" />
+            <InputErrorMessages Errors="CardYearErrorMessage" />
+            <InputErrorMessages Errors="CardCvvErrorMessage" />
+
+
+            <button @onclick="SaveCardDetails" class="bg-[#0055D4] w-full p-[10px] my-[30px] text-center text-white text-[22px] rounded-[5px]">Submit</button>
+        </div>
+    </div>
+    <ShowDetails AllCreditCards="AllCreditCards" />
+</div>
+
+@code {
+    private bool IsCardTurned = false;
+    private string _cardNumber = string.Empty;
+    private string CardNumber
+    {
+        get => _cardNumber; set
+        {
+            _cardNumber = ValidateInputToDigit(value);
+        }
+    }
+    private string OtherCardMask { get; set; } = "################";
+
+    private string _cardHolderName = string.Empty;
+    private string CardHolderName
+    {
+        get => _cardHolderName; set
+        {
+            _cardHolderName = CardHolderHandler(value);
+        }
+    }
+
+    private int _cardMonth;
+    private int CardMonth
+    {
+        get => _cardMonth; set
+        {
+            _cardMonth = value;
+        }
+    }
+
+    private int _currentYear = System.DateTime.Now.Year;
+    private int _cardYear;
+    private int CardYear
+    {
+        get => _cardYear; set
+        {
+            _cardYear = value;
+        }
+    }
+
+    private string _cardCvv = string.Empty;
+    private string CardCvv
+    {
+        get => _cardCvv; set
+        {
+            _cardCvv = ValidateInputToDigit(value);
+        }
+    }
+
+    private bool IsSavingCardDetails { get; set; } = false;
+
+    public List<Card> AllCreditCards { get; set; } = new() { };
+
+    private List<string> CardNumberErrorMessage = new List<string>();
+    private List<string> CardHolderErrorMessage = new List<string>();
+    private List<string> CardYearErrorMessage = new List<string>();
+    private List<string> CardMonthErrorMessage = new List<string>();
+    private List<string> CardCvvErrorMessage = new List<string>();
+
+    private string inputFocused = string.Empty;
+    private string InputFocusedStyle { get; set; } = string.Empty;
+
+    private string CardHolderHandler(string value)
+    {
+        return value;
+    }
+
+    private string ValidateInputToDigit(string value)
+    {
+        string CardNumberInput = string.Empty;
+        if (!string.IsNullOrEmpty(value))
+        {
+            CardNumberInput = OnlyDigits(value);
+        }
+        else
+        {
+            CardNumberInput = string.Empty;
+        }
+        return CardNumberInput;
+    }
+
+    private string OnlyDigits(string input)
+    {
+        string cardNumberDigits = new string(input.Where(char.IsDigit).ToArray());
+        string spacedString = string.Empty;
+
+        for (int i = 0; i < cardNumberDigits.Length; i++)
+        {
+            spacedString += cardNumberDigits[i];
+            if ((i + 1) % 4 == 0 && i + 1 < cardNumberDigits.Length)
+            {
+                spacedString += " ";
+            }
+        }
+        return spacedString;
+    }
+
+    private string CardType
+    {
+        get
+        {
+            var number = CardNumber;
+            var re = new System.Text.RegularExpressions.Regex("^4");
+            if (re.IsMatch(number))
+            {
+                return "visa";
+            }
+
+            re = new System.Text.RegularExpressions.Regex("^5[1-5]");
+            if (re.IsMatch(number))
+            {
+                return "mastercard";
+            }
+
+            re = new System.Text.RegularExpressions.Regex("^6011");
+            if (re.IsMatch(number))
+            {
+                return "discover";
+            }
+            return "visa";
+        }
+    }
+
+    private void ShowBackOfCard(bool showCard)
+    {
+        IsCardTurned = showCard;
+    }
+
+
+    private async Task SaveCardDetails(MouseEventArgs e)
+    {
+        CardNumberErrorMessage.Clear();
+        CardHolderErrorMessage.Clear();
+        CardYearErrorMessage.Clear();
+        CardMonthErrorMessage.Clear();
+        CardCvvErrorMessage.Clear();
+
+
+        if (!IsValidData()) return;
+        IsSavingCardDetails = true;
+
+        await Task.Delay(300);
+
+        Card CurrentCard = new()
+            {
+                CardHolder = CardHolderName,
+                CardNumber = CardNumber,
+                CardMonth = CardMonth,
+                CardYear = CardYear,
+                CardCvv = CardCvv
+            };
+        DbContext.CreditCards.Add(CurrentCard);
+        await DbContext.SaveChangesAsync();
+
+        AllCreditCards = DbContext.CreditCards.ToList();
+
+        CardHolderName = ""; CardNumber = ""; CardYear = 0; CardMonth = 0; CardCvv = "";
+
+        IsSavingCardDetails = false;
+
+    }
+
+    private bool IsValidData()
+    {
+        if (string.IsNullOrEmpty(CardNumber)) CardNumberErrorMessage.Add("Card number can not be empty");
+        if (CardNumber.Length < 15) CardNumberErrorMessage.Add("Card number can not be less than 15 characters");
+
+        if (string.IsNullOrEmpty(CardHolderName)) CardHolderErrorMessage.Add("Card holder name can not be empty");
+
+        if (CardMonth == 0) CardMonthErrorMessage.Add("Please select an expiration month");
+        if (CardYear == 0) CardYearErrorMessage.Add("Please select an expiration year");
+
+        if (string.IsNullOrEmpty(CardCvv)) CardCvvErrorMessage.Add("Please enter a valid CVV number");
+        if (CardCvv.Length < 3) CardCvvErrorMessage.Add("CVV number can not be less than 3 digits");
+
+        return CardNumberErrorMessage.Count == 0 &&
+               CardHolderErrorMessage.Count == 0 &&
+               CardMonthErrorMessage.Count == 0 &&
+               CardYearErrorMessage.Count == 0 &&
+               CardCvvErrorMessage.Count == 0;
+    }
+
+    private void focusInput(string type)
+    {
+        switch (type)
+        {
+            case "name":
+                InputFocusedStyle = "animate-name-input";
+                inputFocused = "name";
+                break;
+            case "number":
+                InputFocusedStyle = "animate-number-input";
+                inputFocused = "number";
+                break;
+            case "date":
+                InputFocusedStyle = "animate-date-input";
+                if (inputFocused == "date")
+                {
+                    InputFocusedStyle = "same-date-input";
+                    return;
+                }; 
+                inputFocused = "date";
+                break;
+            default:
+                InputFocusedStyle = "";
+                break;
+        }
+    }
+
+    private void onblurInput(string type)
+    {
+        switch (type)
+        {
+            case "name":
+                inputFocused = "name";
+                break;
+            case "number":
+                inputFocused = "number";
+                break;
+            case "date":
+                inputFocused = "date";
+                break;
+            default:
+                InputFocusedStyle = "";
+                break;
+        }
+
+
+        InputFocusedStyle = string.IsNullOrEmpty(inputFocused) ? "" : "animate-hide-box";
+    }
+}

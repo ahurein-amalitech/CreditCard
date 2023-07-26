@@ -1,0 +1,11 @@
+﻿<div>
+    @foreach (var error in Errors)
+    {
+        <span class="text-red-500 text-[13px] block">@error</span>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Errors { get; set; } = new() { };
+}

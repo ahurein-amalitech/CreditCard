@@ -1,0 +1,175 @@
+﻿.container {
+}
+
+.credit-card {
+    transform-style: preserve-3d;
+}
+
+.turn-credit-card {
+    transform: rotateY(180deg)
+}
+
+.front-card, .back-card {
+    backface-visibility: hidden;
+}
+
+.back-card {
+    transform: rotateY(180deg)
+}
+
+.other-cards .item3, .other-cards .item7, .other-cards .item11 {
+    margin-right: auto;
+}
+
+.form-input {
+    border: 1px solid #d1d8e0;
+    border-radius: 5px;
+}
+
+    .form-input:focus {
+        outline-color: #60a5fa;
+    }
+
+.animate {
+    transition: all ease-in-out;
+    transition-delay: 0s;
+    transition-duration: 0.2s
+}
+
+.slide-character-topdown {
+    transition: all ease-in-out;
+    transition-delay: 0s;
+    animation-name: animateCardHolderTopDown;
+    animation-duration: 0.5s;
+}
+
+.slide-month-character-topdown {
+    transition: all ease-in-out;
+    transition-delay: 0s;
+    animation-name: animateCardHolderTopDown;
+    animation-duration: 0.2s;
+}
+
+@keyframes animateCardHolderTopDown {
+    0% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(10px);
+    }
+}
+
+.slide-character-fadeUp {
+    transition: all 3s ease-in-out;
+    transition-delay: 0s;
+    animation-name: animateTextFadeUp;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards
+}
+
+
+
+@keyframes animateTextFadeUp {
+    0% {
+        transform: translateX(10px) rotate(45deg);
+    }
+
+    100% {
+    }
+}
+
+
+.animate-box {
+    transition: all 3s ease-in-out;
+    transition-delay: 0s;
+    position: absolute;
+    border-radius: 5px;
+}
+
+.animate-number-input {
+    border: 2px solid #eeee;
+    animation-name: number-animation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards
+}
+
+@keyframes number-animation {
+    0% {
+        height: 80px;
+        width: 350px;
+        top: 30px;
+    }
+
+    100% {
+        height: 50px;
+        width: 310px;
+        top: 100px
+    }
+}
+
+
+.animate-name-input {
+    animation-name: name-animation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    border: 2px solid #eeee;
+}
+
+@keyframes name-animation {
+    0% {
+        height: 50px;
+        width: 310px;
+        top: 100px
+    }
+
+    100% {
+        height: 50px;
+        width: 230px;
+        top: 180px;
+    }
+}
+
+
+.animate-date-input {
+    animation-name: date-animation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    border: 2px solid #eeee;
+}
+
+@keyframes date-animation {
+    0% {
+        height: 50px;
+        width: 230px;
+        top: 180px;
+    }
+
+    100% {
+        height: 50px;
+        width: 80px;
+        top: 180px;
+        right: 10px
+    }
+}
+
+.same-date-input {
+    border: 2px solid #eeee;
+    height: 50px;
+    width: 80px;
+    top: 180px;
+    right: 10px
+}
+
+
+.animate-hide-box {
+    animation-name: hide-box-animation;
+    animation-duration: 0.3s;
+    animation-fill-mode: forwards
+}
+
+@keyframes hide-box-animation {
+    100% {
+        visibility: hidden
+    }
+}

@@ -1,0 +1,31 @@
+﻿@inject CreditCardContext DbContext
+
+@if (_cards.Count > 0)
+{
+    <div class="absolute right-0 mt-[20px] mr-[50px] bg-[#535c68] text-white p-[40px] rounded-[10px] w-[400px]">
+        <div class="text-center mb-2 border-b">Card Details</div>
+        <div class="text-[13px]">
+            @foreach (var card in _cards)
+            {
+                <div class="border-1 border-dashed mb-[10px] px-[10px] flex justify-center">
+                    <span class="mr-[10px] text-[#22a6b3] uppercase">@card.CardHolder :</span>
+                    <span>@card.CardNumber</span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+
+@code {
+    private List<Card> _cards = new() { };
+
+    [Parameter]
+    public List<Card> AllCreditCards { get; set; } = new() { };
+
+    protected override void OnParametersSet()
+    {
+        _cards = DbContext.CreditCards.ToList();
+    }
+}
